@@ -19,7 +19,21 @@ exports.createSupplier = async (req, res) => {
     }
 };
 
-exports.getSuppliers = async (req, res) => {
+exports.getSupplierById = async (req, res) => {
+    const { id } = req.params;
+    console.log(id);
+
+    try {
+        const supplier = await Supplier.findById(id);
+        console.log(supplier);
+
+        return res.json(supplier);
+    } catch (err) {
+        console.error(`Could not get supplier by id ${err.message}`);
+        return res.status(500).json({ error: `Could not get supplier by id ${err.message}` });
+    }
+};
+exports.getSuppliers = async (_req, res) => {
     try {
         const suppliers = await Supplier.find();
         console.log(suppliers);
