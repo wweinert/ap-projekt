@@ -4,6 +4,7 @@ const router = express.Router();
 
 const supplierController = require("../controllers/supplier-controller");
 
-router.get("/", supplierController.createSupplier);
+router.post("/", supplierController.createSupplier);
+router.get("/", supplierController.getSuppliers);
 
 module.exports = router;
