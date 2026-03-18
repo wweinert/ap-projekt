@@ -11,7 +11,7 @@ export type Supplier = {
 };
 
 export async function fetchSuppliers(): Promise<Supplier[]> {
-    const res = await fetch(`${API_BASE_URL}/suppliers`);
+    const res = await fetch(`${API_BASE_URL}/api/suppliers`);
     if (!res.ok) throw new Error(`Failed to fetch suppliers: ${res.status}`);
     return res.json();
 }
