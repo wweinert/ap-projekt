@@ -7,8 +7,9 @@ import { ReportsScreen } from "./src/screens/ReportsScreen";
 import { ReportDetails } from "./src/screens/ReportDetails";
 import { CreateReport } from "./src/screens/CreateReport";
 
+
 function HomeScreen() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     return (
         <View style={{ padding: 16, gap: 12 }}>
             <Button title={"Lieferanten"} onPress={() => navigation.navigate("Lieferanten")} />

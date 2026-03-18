@@ -4,7 +4,7 @@ import { View, Text, FlatList, Pressable, TextInput, Button } from "react-native
 import { useNavigation } from "@react-navigation/native";
 
 export function SuppliersScreen() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
@@ -13,20 +13,19 @@ export function SuppliersScreen() {
     const [phone, setPhone] = useState("");
     const [notes, setNotes] = useState("");
 
-    const [error, setError] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     async function load() {
         try {
-            setError(false);
+            setError(null);
             setLoading(true);
-
             setSuppliers(await fetchSuppliers());
-            setLoading(false);
         } catch (err: any) {
-            console.log(`Could not fetch suppliers ${err.message}`);
+            console.error("Failed to load suppliers:", err);
+            setError(err.message || "Failed to load suppliers");
         } finally {
-            setError(false);
+            setLoading(false);
         }
     }
 
@@ -36,15 +35,19 @@ export function SuppliersScreen() {
 
     async function onCreate() {
         try {
+            setError(null);
+            if (!title.trim()) {
+                setError("Title is required");
+                return;
+            }
             await createSupplier({ title, contactMail, phone, notes });
             setTitle("");
             setContactMail("");
             setPhone("");
             setNotes("");
-            load();
+            await load();
         } catch (err: any) {
-            setError(err.message);
-            console.error(`Could not create supplier ${err.message}`);
+            setError(err.message || "Failed to create supplier");
         }
     }
 
@@ -57,54 +60,48 @@ export function SuppliersScreen() {
     }
 
     return (
-        <>
-            <View style={{ padding: 16, gap: 12 }}>
-                <View style={{ padding: 8, gap: 8 }}>
-                    <TextInput
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
-                        onChangeText={setTitle}
-                        value={title}
-                        placeholder="Titel"
-                    />
-                    <TextInput
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
-                        onChangeText={setContactMail}
-                        value={contactMail}
-                        placeholder="example@mail.com"
-                    />
-                    <TextInput
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
-                        onChangeText={setPhone}
-                        value={phone}
-                        placeholder="Telefonnummer"
-                    />
-                    <TextInput
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
-                        onChangeText={setNotes}
-                        value={notes}
-                        placeholder="Notiz"
-                        multiline
-                        numberOfLines={3}
-                    />
+        <View style={{ padding: 16, gap: 12 }}>
+            <Text style={{ fontSize: 22, fontWeight: "bold" }}>Lieferanten</Text>
 
-                    <Button title="Anlegen" onPress={onCreate} />
-                </View>
-                {error ? <Text>{error}</Text> : null}
-                <FlatList
-                    data={suppliers}
-                    keyExtractor={(s) => s._id}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            onPress={() => navigation.navigate("SupplierDetails", { supplierId: item._id })}
-                            style={{ paddingVertical: 8, borderBottomWidth: 1 }}
-                        >
-                            <Text style={{ fontWeight: "600" }}>{item.title}</Text>
-                            {item.contactMail ? <Text>{item.contactMail}</Text> : null}
-                            {item.notes ? <Text>{item.notes}</Text> : null}
-                        </Pressable>
-                    )}
+            <View style={{ paddingVertical: 8, gap: 8 }}>
+                <Text style={{ fontWeight: "600" }}>Lieferant erstellen</Text>
+                <TextInput
+                    placeholder="Name"
+                    value={title}
+                    onChangeText={setTitle}
+                    style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                 />
+                <TextInput
+                    placeholder="Contact Mail"
+                    value={contactMail}
+                    onChangeText={setContactMail}
+                    style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
+                />
+                <TextInput
+                    placeholder="Notes"
+                    value={notes}
+                    onChangeText={setNotes}
+                    style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
+                    multiline
+                    numberOfLines={3}
+                />
+                <Button title="Create" onPress={onCreate} />
             </View>
-        </>
+
+            <FlatList
+                data={suppliers}
+                keyExtractor={(s) => s._id}
+                renderItem={({ item }) => (
+                    <Pressable
+                        onPress={() => navigation.navigate("SupplierDetails", { supplierId: item._id })}
+                        style={{ paddingVertical: 8, borderBottomWidth: 1 }}
+                    >
+                        <Text style={{ fontWeight: "600" }}>{item.title}</Text>
+                        {item.contactMail ? <Text>{item.contactMail}</Text> : null}
+                        {item.notes ? <Text>{item.notes}</Text> : null}
+                    </Pressable>
+                )}
+            />
+        </View>
     );
 }
