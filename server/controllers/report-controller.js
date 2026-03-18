@@ -8,7 +8,7 @@ exports.createReport = async (req, res) => {
         const report = await Report.create({
             title,
             description,
-            status: !status ? "OK" : "DEFECT",
+            status,
             supplierId,
             createdAt: new Date(),
         });
@@ -20,7 +20,7 @@ exports.createReport = async (req, res) => {
     }
 };
 
-exports.getBySupplierId = async (req, res) => {
+exports.getByAllSupplierId = async (req, res) => {
     try {
         const { supplierId } = req.params;
 
@@ -62,19 +62,41 @@ exports.getReportById = async (req, res) => {
 exports.updateById = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title } = req.body;
+        const { title, description, status } = req.body;
 
-        const report = await Report.findOneAndUpdate({});
-        report.title = title;
-        report.description = description;
-        report.status = status;
+        const updatedReport = await Report.findByIdAndUpdate(id, {
+            title,
+            description,
+            status,
+        });
 
-        await report.save();
-        console.log(report);
+        console.log(updatedReport);
 
-        return res.status(200).json(report);
+        if (!updatedReport) {
+            return res.status(404).json({ error: "Report not found" });
+        }
+
+        return res.status(200).json(updatedReport);
     } catch (err) {
         console.error(`Could not update a report ${err.message}`);
         return res.status(500).json({ error: `Could not update a report ${err.message}` });
+    }
+};
+
+exports.deleteById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deletedReport = await Report.findByIdAndDelete(id);
+        console.log(deletedReport);
+
+        if (!deletedReport) {
+            return res.status(404).json({ error: "Report not found" });
+        }
+
+        return res.status(200).json(deletedReport);
+    } catch (err) {
+        console.error(`Could not delete a report ${err.message}`);
+        return res.status(500).json({ error: `Could not delete a report ${err.message}` });
     }
 };

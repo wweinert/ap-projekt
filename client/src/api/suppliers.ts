@@ -1,13 +1,14 @@
-import { API_BASE_URL } from "./api";
+import { API_BASE_URL } from "../config/api";
 
-export interface Supplier {
+export type Supplier = {
     _id: string;
     title: string;
     contactMail: string;
     phone?: string;
+    note?: string;
     createdAt: string;
     isActive?: boolean;
-}
+};
 
 export async function fetchSuppliers(): Promise<Supplier[]> {
     const res = await fetch(`${API_BASE_URL}/suppliers`);

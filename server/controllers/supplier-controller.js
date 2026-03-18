@@ -49,10 +49,7 @@ exports.getSuppliers = async (_req, res) => {
 exports.updateById = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, isActive } = req.body;
-
-        const contactMail = req.body.contactEmail || "";
-        const phone = req.body.phone || "";
+        const { title, contactMail, phone, isActive } = req.body;
 
         const updatedSupplier = await Supplier.findByIdAndUpdate(
             id,
@@ -62,9 +59,9 @@ exports.updateById = async (req, res) => {
                 phone,
                 isActive,
             },
-            { new: true },
+            // { new: true },
         );
-        console.log(updatedSupplier);
+        // console.log(updatedSupplier);
 
         if (!updatedSupplier) {
             return res.status(404).json({ error: "Supplier not found" });

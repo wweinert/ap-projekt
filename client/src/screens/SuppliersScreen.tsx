@@ -3,7 +3,7 @@ import { fetchSuppliers, Supplier } from "../api/suppliers";
 import { View, Text } from "react-native";
 
 export function SupplierScreen() {
-    const [suppliers, setSuppliers] = useState([]);
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
     async function load() {
         try {
