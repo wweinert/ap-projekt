@@ -11,6 +11,23 @@ export type Report = {
     createdAt: string;
 };
 
+export async function fetchReports(): Promise<Report[]> {
+    const res = await fetch(`${API_BASE_URL}/api/reports`);
+    if (!res.ok) throw new Error(`Failed to fetch reports: ${res.status}`);
+    return res.json();
+}
+export async function fetchReportsBySupplierId(id: string): Promise<Report[]> {
+    const res = await fetch(`${API_BASE_URL}/api/reports/supplier/${id}`);
+    if (!res.ok) throw new Error(`Failed to fetch reports by supplier id: ${res.status}`);
+    return res.json();
+}
+
+export async function fetchReportsById(id: string): Promise<Report> {
+    const res = await fetch(`${API_BASE_URL}/api/reports/${id}`);
+    if (!res.ok) throw new Error(`Failed to fetch reports by id: ${res.status}`);
+    return res.json();
+}
+
 export async function createReport(input: {
     title: string;
     description?: string;

@@ -7,7 +7,6 @@ import { ReportsScreen } from "./src/screens/ReportsScreen";
 import { ReportDetails } from "./src/screens/ReportDetails";
 import { CreateReport } from "./src/screens/CreateReport";
 
-
 function HomeScreen() {
     const navigation = useNavigation<any>();
     return (
@@ -28,7 +27,7 @@ export default function App() {
             <Stack.Navigator>
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Lieferanten" component={SuppliersScreen} />
-                <Stack.Screen name="SupplierDetails" component={SupplierDetails} />
+                <Stack.Screen name="Lieferantendetails" component={SupplierDetails} />
                 <Stack.Screen name="Berichte" component={ReportsScreen} />
                 <Stack.Screen name="ReportDetails" component={ReportDetails} />
                 <Stack.Screen name="CreateReport" component={CreateReport} />

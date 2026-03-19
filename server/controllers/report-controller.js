@@ -10,7 +10,7 @@ exports.createReport = async (req, res) => {
             description,
             status,
             supplierId,
-            createdAt: new Date(),
+            createdAt: new Date().toISOString(),
         });
 
         return res.json(report);

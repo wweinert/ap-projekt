@@ -14,6 +14,7 @@ export function SuppliersScreen() {
     const [notes, setNotes] = useState("");
 
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     async function load() {
@@ -22,7 +23,7 @@ export function SuppliersScreen() {
             setLoading(true);
             setSuppliers(await fetchSuppliers());
         } catch (err: any) {
-            console.error("Failed to load suppliers:", err);
+            console.error("Failed to load suppliers:", err.message);
             setError(err.message || "Failed to load suppliers");
         } finally {
             setLoading(false);
@@ -40,6 +41,8 @@ export function SuppliersScreen() {
                 setError("Title is required");
                 return;
             }
+            setSaving(true);
+
             await createSupplier({ title, contactMail, phone, notes });
             setTitle("");
             setContactMail("");
@@ -72,20 +75,20 @@ export function SuppliersScreen() {
                     style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                 />
                 <TextInput
-                    placeholder="Contact Mail"
+                    placeholder="Kontakt-E-Mail"
                     value={contactMail}
                     onChangeText={setContactMail}
                     style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                 />
                 <TextInput
-                    placeholder="Notes"
+                    placeholder="Notizen"
                     value={notes}
                     onChangeText={setNotes}
                     style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                     multiline
                     numberOfLines={3}
                 />
-                <Button title="Create" onPress={onCreate} />
+                <Button title={saving ? "Speichern..." : "Lieferant hinzufügen"} onPress={onCreate} />
             </View>
 
             <FlatList
@@ -93,7 +96,7 @@ export function SuppliersScreen() {
                 keyExtractor={(s) => s._id}
                 renderItem={({ item }) => (
                     <Pressable
-                        onPress={() => navigation.navigate("SupplierDetails", { supplierId: item._id })}
+                        onPress={() => navigation.navigate("Lieferantendetails", { supplierId: item._id })}
                         style={{ paddingVertical: 8, borderBottomWidth: 1 }}
                     >
                         <Text style={{ fontWeight: "600" }}>{item.title}</Text>

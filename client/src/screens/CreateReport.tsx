@@ -71,19 +71,9 @@ export function CreateReport() {
 
     return (
         <View style={{ padding: 16, gap: 12 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold" }}>Create Report</Text>
             {error && <Text style={{ color: "red" }}>{error}</Text>}
 
-            <Text style={{ fontSize: 16, fontWeight: "bold" }}>Your Mail</Text>
-            <TextInput
-                value={createdByEmail}
-                onChangeText={setCreatedByEmail}
-                placeholder="Enter your email"
-                autoCapitalize="none"
-                style={{ borderWidth: 1, padding: 8 }}
-            />
-
-            <Text style={{ fontWeight: "600" }}>Title</Text>
+            <Text style={{ fontWeight: "600" }}>Titel</Text>
             <TextInput
                 value={title}
                 onChangeText={setTitle}
@@ -92,7 +82,7 @@ export function CreateReport() {
                 style={{ borderWidth: 1, padding: 8 }}
             />
 
-            <Text style={{ fontWeight: "600" }}>Description</Text>
+            <Text style={{ fontWeight: "600" }}>Beschreibung</Text>
             <TextInput
                 value={description}
                 onChangeText={setDescription}
@@ -106,10 +96,10 @@ export function CreateReport() {
                 <Button title="OK" onPress={() => setStatus("OK")} />
                 <Button title="DEFECT" onPress={() => setStatus("DEFECT")} />
             </View>
-            <Text>Selected: {status}</Text>
+            <Text>Ausgewählt: {status}</Text>
 
-            <Text style={{ fontWeight: "600" }}>Select supplier</Text>
-            <Button title="Reload suppliers" onPress={loadSuppliers} />
+            <Text style={{ fontWeight: "600" }}>Lieferanten auswählen</Text>
+            <Button title="Lieferanten neu laden" onPress={loadSuppliers} />
 
             <FlatList
                 data={suppliers}
@@ -132,9 +122,9 @@ export function CreateReport() {
                 }}
             />
 
-            <Text>Supplier: {selectedSupplier ? selectedSupplier.title : "None"}</Text>
+            <Text>Liferant: {selectedSupplier ? selectedSupplier.title : "None"}</Text>
 
-            <Button title={loading ? "Creating..." : "Create Report"} onPress={onCreate} disabled={loading} />
+            <Button title={loading ? "Speichern..." : "Bericht speichern"} onPress={onCreate} disabled={loading} />
         </View>
     );
 }

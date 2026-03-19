@@ -1,4 +1,4 @@
-import { Button, Text, TextInput, View } from "react-native";
+import { Button, Text, TextInput, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Supplier, fetchSupplierById, updateSupplier } from "../api/suppliers";
 import { useEffect, useState } from "react";
@@ -8,9 +8,11 @@ export function SupplierDetails({ route }: any) {
     const { supplierId } = route.params;
 
     const [supplier, setSupplier] = useState<Supplier | null>(null);
-    const [name, setName] = useState("");
-    const [contactEmail, setContactEmail] = useState("");
+    const [title, setTitle] = useState("");
+    const [contactMail, setContactMail] = useState("");
+    const [phone, setPhone] = useState("");
     const [notes, setNotes] = useState("");
+    const [isActive, setIsActive] = useState(true);
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -23,8 +25,8 @@ export function SupplierDetails({ route }: any) {
 
             const data = await fetchSupplierById(supplierId);
             setSupplier(data);
-            setName(data.title || "");
-            setContactEmail(data.contactMail || "");
+            setTitle(data.title || "");
+            setContactMail(data.contactMail || "");
             setNotes(data.notes || "");
         } catch (err: any) {
             setError(err.message ?? "Failed to load supplier");
@@ -36,7 +38,7 @@ export function SupplierDetails({ route }: any) {
         try {
             setError(null);
 
-            if (!name.trim()) {
+            if (!title.trim()) {
                 setError("Name is required");
                 return;
             }
@@ -44,9 +46,11 @@ export function SupplierDetails({ route }: any) {
             setSaving(true);
 
             await updateSupplier(supplierId, {
-                name,
-                contactEmail,
+                title,
+                contactMail,
+                phone,
                 notes,
+                isActive,
             });
 
             navigation.goBack();
@@ -61,89 +65,58 @@ export function SupplierDetails({ route }: any) {
         load();
     }, []);
 
-    if (loading) {
-        return (
-            <View>
-                <Text>Nicht geladen</Text>
-            </View>
-        );
-    }
-
     return (
         <View style={{ padding: 16, gap: 12 }}>
-            <Button title="Back" onPress={() => navigation.goBack()} />
-            <Text style={{ fontSize: 22, fontWeight: "bold" }}>Supplier Detail</Text>
-
             {loading ? <Text>Loading...</Text> : null}
             {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+
             {!loading ? (
                 <>
                     <Text style={{ fontWeight: "600" }}>Name</Text>
                     <TextInput
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Supplier name"
+                        value={title}
+                        onChangeText={setTitle}
+                        placeholder="Name des Lieferanten"
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                     />
 
-                    <Text style={{ fontWeight: "600" }}>Contact Email</Text>
+                    <Text style={{ fontWeight: "600" }}>Kontakt-E-Mail</Text>
                     <TextInput
-                        value={contactEmail}
-                        onChangeText={setContactEmail}
-                        placeholder="Contact email"
+                        value={contactMail}
+                        onChangeText={setContactMail}
+                        placeholder="Kontakt-E-Mail"
                         autoCapitalize="none"
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                     />
-
-                    <Text style={{ fontWeight: "600" }}>Notes</Text>
+                    <Text style={{ fontWeight: "600" }}>Telefon</Text>
+                    <TextInput
+                        value={phone}
+                        onChangeText={setPhone}
+                        placeholder="Telefon"
+                        keyboardType="numeric"
+                        style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
+                    />
+                    <Text style={{ fontWeight: "600" }}>Notizen</Text>
                     <TextInput
                         value={notes}
                         onChangeText={setNotes}
-                        placeholder="Notes"
+                        placeholder="Notizen"
                         multiline
                         numberOfLines={4}
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4, minHeight: 90 }}
                     />
+                    <Button title={saving ? "Speichern..." : "Aktualisieren"} onPress={onSave} disabled={saving} />
 
-                    <Button title={saving ? "Saving..." : "Save Supplier"} onPress={onSave} disabled={saving} />
+                    <Text style={{ fontWeight: "600" }}>Aktiv</Text>
+                    <View style={{ flexDirection: "row", gap: 8 }}>
+                        <TouchableOpacity
+                            style={[isActive ? { backgroundColor: "green" } : { backgroundColor: "grey" }]}
+                            onPress={() => setIsActive(true)}
+                        ></TouchableOpacity>
+                        <Button title="AUS" onPress={() => setIsActive(false)} />
+                    </View>
                 </>
             ) : null}
         </View>
     );
 }
-
-// const [error, setError] = useState(false);
-// const [loading, setLoading] = useState(true);
-
-// function load() {
-//     try {
-//         setError(false);
-//         setLoading(false);
-//     } catch (err: any) {
-//         setError(err.message);
-//         console.log(`Could not fetch supplier by id ${err.message}`);
-//     } finally {
-//         setError(false);
-//     }
-// }
-
-// useEffect(() => {
-//     load();
-// }, []);
-
-// if (loading) {
-//     return (
-//         <View>
-//             <Text>Nicht geladen</Text>
-//         </View>
-//     );
-// }
-
-// return (
-//     <>
-//         <View>
-//             {error ? <Text>{error}</Text> : null}
-//             <Text>{}</Text>
-//         </View>
-//     </>
-// );

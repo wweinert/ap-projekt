@@ -24,10 +24,10 @@ export async function fetchSupplierById(id: string): Promise<Supplier> {
 
 export async function updateSupplier(
     id: string,
-    input: { name: string; contactEmail?: string; notes?: string },
+    input: { title?: string; contactMail?: string; phone?: string; notes?: string; isActive: boolean },
 ): Promise<Supplier> {
     const res = await fetch(`${API_BASE_URL}/suppliers/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
     });

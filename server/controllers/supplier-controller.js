@@ -51,6 +51,8 @@ exports.updateById = async (req, res) => {
         const { id } = req.params;
         const { title, contactMail, phone, isActive } = req.body;
 
+        console.log(title, contactMail, phone, isActive);
+
         const updatedSupplier = await Supplier.findByIdAndUpdate(
             id,
             {
