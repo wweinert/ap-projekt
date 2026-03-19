@@ -61,8 +61,7 @@ export function ReportDetails({ route }: any) {
                         numberOfLines={4}
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4, minHeight: 90 }}
                     />
-                    <Text style={{ fontWeight: "600" }}>Status</Text>
-                    <View style={{ flexDirection: "row", gap: 8 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                         <TouchableOpacity
                             style={[
                                 styles.button,
@@ -91,6 +90,7 @@ const styles = StyleSheet.create({
     button: {
         paddingHorizontal: 8,
         paddingVertical: 4,
-        color: "#fff",
+        color: "white",
+        width: "50%",
     },
 });
