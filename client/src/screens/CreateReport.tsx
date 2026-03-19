@@ -77,7 +77,7 @@ export function CreateReport() {
             <TextInput
                 value={title}
                 onChangeText={setTitle}
-                placeholder="e.g. Delivery 25.02"
+                placeholder="z. B. Lieferung von 25.02"
                 autoCapitalize="none"
                 style={{ borderWidth: 1, padding: 8 }}
             />
@@ -110,11 +110,15 @@ export function CreateReport() {
                     return (
                         <Pressable
                             onPress={() => setSelectedSupplier(item)}
-                            style={{
-                                padding: 10,
-                                borderBottomWidth: 1,
-                                backgroundColor: selected ? "#eaeaea" : "transparent",
-                            }}
+                            disabled={!!item.isActive}
+                            style={[
+                                {
+                                    padding: 10,
+                                    borderBottomWidth: 1,
+                                    backgroundColor: selected ? "#eaeaea" : "transparent",
+                                },
+                                { backgroundColor: !!item.isActive ? "#ccc" : "transparent" },
+                            ]}
                         >
                             <Text>{item.title}</Text>
                         </Pressable>

@@ -3,7 +3,7 @@ import { API_BASE_URL } from "../config/api";
 export type Supplier = {
     _id: string;
     title: string;
-    contactMail: string;
+    contactEmail: string;
     phone?: string;
     notes?: string;
     createdAt: string;
@@ -24,7 +24,7 @@ export async function fetchSupplierById(id: string): Promise<Supplier> {
 
 export async function updateSupplier(
     id: string,
-    input: { title?: string; contactMail?: string; phone?: string; notes?: string; isActive: boolean },
+    input: { title?: string; contactEmail?: string; phone?: string; notes?: string; isActive: boolean },
 ): Promise<Supplier> {
     const res = await fetch(`${API_BASE_URL}/suppliers/${id}`, {
         method: "PATCH",
@@ -38,7 +38,7 @@ export async function updateSupplier(
 
 export async function createSupplier(input: {
     title: string;
-    contactMail: string;
+    contactEmail: string;
     phone?: string;
     notes?: string;
 }): Promise<Supplier> {

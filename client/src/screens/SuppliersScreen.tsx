@@ -9,7 +9,7 @@ export function SuppliersScreen() {
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
     const [title, setTitle] = useState("");
-    const [contactMail, setContactMail] = useState("");
+    const [contactEmail, setContactEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [notes, setNotes] = useState("");
 
@@ -43,9 +43,9 @@ export function SuppliersScreen() {
             }
             setSaving(true);
 
-            await createSupplier({ title, contactMail, phone, notes });
+            await createSupplier({ title, contactEmail, phone, notes });
             setTitle("");
-            setContactMail("");
+            setContactEmail("");
             setPhone("");
             setNotes("");
             await load();
@@ -64,8 +64,6 @@ export function SuppliersScreen() {
 
     return (
         <View style={{ padding: 16, gap: 12 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold" }}>Lieferanten</Text>
-
             <View style={{ paddingVertical: 8, gap: 8 }}>
                 <Text style={{ fontWeight: "600" }}>Lieferant erstellen</Text>
                 <TextInput
@@ -76,8 +74,15 @@ export function SuppliersScreen() {
                 />
                 <TextInput
                     placeholder="Kontakt-E-Mail"
-                    value={contactMail}
-                    onChangeText={setContactMail}
+                    value={contactEmail}
+                    onChangeText={setContactEmail}
+                    style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
+                />
+                <TextInput
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="Telefon"
+                    keyboardType="numeric"
                     style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                 />
                 <TextInput
@@ -90,6 +95,7 @@ export function SuppliersScreen() {
                 />
                 <Button title={saving ? "Speichern..." : "Lieferant hinzufügen"} onPress={onCreate} />
             </View>
+            <Text style={{ fontWeight: "600" }}>Lieferanten</Text>
 
             <FlatList
                 data={suppliers}
@@ -97,10 +103,11 @@ export function SuppliersScreen() {
                 renderItem={({ item }) => (
                     <Pressable
                         onPress={() => navigation.navigate("Lieferantendetails", { supplierId: item._id })}
-                        style={{ paddingVertical: 8, borderBottomWidth: 1 }}
+                        style={[{ padding: 8, borderBottomWidth: 1 }, !item.isActive && { backgroundColor: "#ccc" }]}
+                        disabled={!item.isActive}
                     >
                         <Text style={{ fontWeight: "600" }}>{item.title}</Text>
-                        {item.contactMail ? <Text>{item.contactMail}</Text> : null}
+                        {item.contactEmail ? <Text>{item.contactEmail}</Text> : null}
                         {item.notes ? <Text>{item.notes}</Text> : null}
                     </Pressable>
                 )}

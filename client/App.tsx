@@ -13,7 +13,7 @@ function HomeScreen() {
         <View style={{ padding: 16, gap: 12 }}>
             <Button title={"Lieferanten"} onPress={() => navigation.navigate("Lieferanten")} />
             <Button title={"Berichte"} onPress={() => navigation.navigate("Berichte")} />
-            <Button title={"Bericht erfassen"} onPress={() => navigation.navigate("CreateReport")} />
+            <Button title={"Bericht erstellen"} onPress={() => navigation.navigate("Bericht erstellen")} />
             <Button title={"Ausloggen"} onPress={() => console.log("loggout")} />
         </View>
     );
@@ -30,7 +30,7 @@ export default function App() {
                 <Stack.Screen name="Lieferantendetails" component={SupplierDetails} />
                 <Stack.Screen name="Berichte" component={ReportsScreen} />
                 <Stack.Screen name="ReportDetails" component={ReportDetails} />
-                <Stack.Screen name="CreateReport" component={CreateReport} />
+                <Stack.Screen name="Bericht erstellen" component={CreateReport} />
             </Stack.Navigator>
         </NavigationContainer>
     );

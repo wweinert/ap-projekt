@@ -3,13 +3,15 @@ const Supplier = require("../models/Supplier");
 exports.createSupplier = async (req, res) => {
     try {
         const { title } = req.body;
-        const contactMail = req.body.contactEmail || "";
+        const contactEmail = req.body.contactEmail || "";
         const phone = req.body.phone || "";
+        const notes = req.body.notes || "";
 
         const supplier = await Supplier.create({
             title,
-            contactMail,
+            contactEmail,
             phone,
+            notes,
             isActive: true,
             createdAt: new Date(),
         });
@@ -49,15 +51,15 @@ exports.getSuppliers = async (_req, res) => {
 exports.updateById = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, contactMail, phone, isActive } = req.body;
+        const { title, contactEmail, phone, isActive } = req.body;
 
-        console.log(title, contactMail, phone, isActive);
+        console.log(title, contactEmail, phone, isActive);
 
         const updatedSupplier = await Supplier.findByIdAndUpdate(
             id,
             {
                 title,
-                contactMail,
+                contactEmail,
                 phone,
                 isActive,
             },

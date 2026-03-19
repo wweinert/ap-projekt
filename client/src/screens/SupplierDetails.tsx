@@ -9,10 +9,10 @@ export function SupplierDetails({ route }: any) {
 
     const [supplier, setSupplier] = useState<Supplier | null>(null);
     const [title, setTitle] = useState("");
-    const [contactMail, setContactMail] = useState("");
+    const [contactEmail, setContactEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [notes, setNotes] = useState("");
-    const [isActive, setIsActive] = useState(true);
+    const [isActive, setIsActive] = useState<boolean>(false);
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -26,8 +26,9 @@ export function SupplierDetails({ route }: any) {
             const data = await fetchSupplierById(supplierId);
             setSupplier(data);
             setTitle(data.title || "");
-            setContactMail(data.contactMail || "");
+            setContactEmail(data.contactEmail || "");
             setNotes(data.notes || "");
+            setIsActive(data.isActive || false);
         } catch (err: any) {
             setError(err.message ?? "Failed to load supplier");
         } finally {
@@ -47,7 +48,7 @@ export function SupplierDetails({ route }: any) {
 
             await updateSupplier(supplierId, {
                 title,
-                contactMail,
+                contactEmail,
                 phone,
                 notes,
                 isActive,
@@ -72,7 +73,6 @@ export function SupplierDetails({ route }: any) {
 
             {!loading ? (
                 <>
-                    <Text style={{ fontWeight: "600" }}>Name</Text>
                     <TextInput
                         value={title}
                         onChangeText={setTitle}
@@ -80,15 +80,13 @@ export function SupplierDetails({ route }: any) {
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                     />
 
-                    <Text style={{ fontWeight: "600" }}>Kontakt-E-Mail</Text>
                     <TextInput
-                        value={contactMail}
-                        onChangeText={setContactMail}
+                        value={contactEmail}
+                        onChangeText={setContactEmail}
                         placeholder="Kontakt-E-Mail"
                         autoCapitalize="none"
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                     />
-                    <Text style={{ fontWeight: "600" }}>Telefon</Text>
                     <TextInput
                         value={phone}
                         onChangeText={setPhone}
@@ -96,7 +94,6 @@ export function SupplierDetails({ route }: any) {
                         keyboardType="numeric"
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4 }}
                     />
-                    <Text style={{ fontWeight: "600" }}>Notizen</Text>
                     <TextInput
                         value={notes}
                         onChangeText={setNotes}
@@ -105,18 +102,39 @@ export function SupplierDetails({ route }: any) {
                         numberOfLines={4}
                         style={{ borderWidth: 1, padding: 8, borderRadius: 4, minHeight: 90 }}
                     />
-                    <Button title={saving ? "Speichern..." : "Aktualisieren"} onPress={onSave} disabled={saving} />
 
-                    <Text style={{ fontWeight: "600" }}>Aktiv</Text>
-                    <View style={{ flexDirection: "row", gap: 8 }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                         <TouchableOpacity
-                            style={[isActive ? { backgroundColor: "green" } : { backgroundColor: "grey" }]}
+                            style={[
+                                styles.button,
+                                isActive ? { backgroundColor: "grey" } : { backgroundColor: "#ccc" },
+                            ]}
                             onPress={() => setIsActive(true)}
-                        ></TouchableOpacity>
-                        <Button title="AUS" onPress={() => setIsActive(false)} />
+                        >
+                            <Text>ACTIV</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.button,
+                                isActive ? { backgroundColor: "#ccc" } : { backgroundColor: "grey" },
+                            ]}
+                            onPress={() => setIsActive(false)}
+                        >
+                            <Text>INAKTIV</Text>
+                        </TouchableOpacity>
                     </View>
+                    <Button title={saving ? "Speichern..." : "Aktualisieren"} onPress={onSave} disabled={saving} />
                 </>
             ) : null}
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    button: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        color: "white",
+        width: "50%",
+    },
+});

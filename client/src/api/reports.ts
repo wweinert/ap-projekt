@@ -16,6 +16,7 @@ export async function fetchReports(): Promise<Report[]> {
     if (!res.ok) throw new Error(`Failed to fetch reports: ${res.status}`);
     return res.json();
 }
+
 export async function fetchReportsBySupplierId(id: string): Promise<Report[]> {
     const res = await fetch(`${API_BASE_URL}/api/reports/supplier/${id}`);
     if (!res.ok) throw new Error(`Failed to fetch reports by supplier id: ${res.status}`);

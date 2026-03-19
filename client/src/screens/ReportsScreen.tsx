@@ -26,6 +26,7 @@ export function ReportsScreen() {
             setLoading(false);
         }
     }
+    
     async function loadSuppliers() {
         try {
             setError(null);
