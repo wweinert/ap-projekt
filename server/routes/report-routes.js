@@ -3,17 +3,16 @@ const express = require("express");
 const router = express.Router();
 
 const reportController = require("../controllers/report-controller");
+const { uploadReportImages } = require("../middleware/uploadMiddleware");
+const { requireAuth } = require("../middleware/auth-middleware");
 
-router.get("/", reportController.getReports);
-router.post("/", reportController.createReport);
+router.get("/", requireAuth, reportController.getReports);
+router.get("/supplier/:supplierId", requireAuth, reportController.getAllBySupplierId);
+router.get("/:id/pdf", requireAuth, reportController.generatePdfById);
+router.get("/:id", requireAuth, reportController.getReportById);
 
-router.get("/:id", reportController.getReportById);
-router.patch("/:id", reportController.updateById);
-
-router.delete("/:id/delete", reportController.deleteById);
-
-router.get("/supplier/:supplierId", reportController.getAllBySupplierId);
-
-router.get("/:id/pdf", reportController.generatePdfById);
+router.post("/", requireAuth, uploadReportImages, reportController.createReport);
+router.patch("/:id", requireAuth, reportController.updateById);
+router.delete("/:id/delete", requireAuth, reportController.deleteById);
 
 module.exports = router;

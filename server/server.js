@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const PORT = process.env.PORT;
 const DB_URL = process.env.DB_URL;
@@ -9,6 +10,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 const authRoutes = require("./routes/auth-routes.js");
