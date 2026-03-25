@@ -22,9 +22,7 @@ exports.createReport = async (req, res) => {
         const supplier = await Supplier.findById(supplierId);
         if (!supplier) return res.status(404).json({ error: "Supplier not found" });
 
-        const uploadedImages = Array.isArray(req.files)
-            ? req.files.map((file) => `/uploads/reports/${file.filename}/images/${file.filename}`)
-            : [];
+        const uploadedImages = Array.isArray(req.files) ? req.files.map((file) => `/uploads/reports/images/${file.filename}`) : [];
 
         const report = await Report.create({
             title: title.trim(),
@@ -162,7 +160,7 @@ exports.generatePdfById = async (req, res) => {
         await page.pdf({ path: pdfPath, format: "A4", printBackground: true });
         await browser.close();
 
-        res.download(pdfPath);
+        return res.download(pdfPath, `report_${report._id}.pdf`);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "could not create PDF" });

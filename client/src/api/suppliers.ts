@@ -24,8 +24,9 @@ export async function fetchSupplierById(id: string): Promise<Supplier> {
 }
 
 export async function getGeneratedPDF(id: string, input: { from: string; to: string }): Promise<Response> {
-    const res = await fetch(`${API_BASE_URL}/api/suppliers/${id}/pdf?${input.from}&${input.to}`, { headers: await getAuthHeaders() });
-    if (!res.ok) throw new Error(`Failed to fetch report PDF: ${res.status}`);
+    const query = `from=${encodeURIComponent(input.from)}&to=${encodeURIComponent(input.to)}`;
+    const res = await fetch(`${API_BASE_URL}/api/suppliers/${id}/pdf?${query}`, { headers: await getAuthHeaders() });
+    if (!res.ok) throw new Error(`Failed to fetch supplier PDF: ${res.status}`);
     return res;
 }
 

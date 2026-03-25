@@ -83,7 +83,7 @@
             <tr>
                 <th>Beschreibung</th>
                 <td>
-                    <%= supplier.description || "Keine Beschreibung" %>
+                    <%= supplier.notes || "Keine Notizen" %>
                 </td>
             </tr>
             <tr>
@@ -136,7 +136,7 @@
                                 <%= r.createdAt ? new Date(r.createdAt).toLocaleString("de-DE") : "" %>
                             </td>
                             <td>
-                                <%= r.isDamaged ? "Defekt" : "Okay" %>
+                                <%= r.status === "DEFECT" ? "Defekt" : "OK" %>
                             </td>
                         </tr>
                         <% }) %>

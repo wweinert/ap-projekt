@@ -1,9 +1,8 @@
-import { Button, Text, TextInput, View, StyleSheet, TouchableOpacity, Platform } from "react-native";
-import { File, Directory, Paths } from "expo-file-system";
+import { Button, Text, TextInput, View, StyleSheet, TouchableOpacity, Platform, Alert } from "react-native";
+import { File, Paths } from "expo-file-system";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
-import * as FileSystem from "expo-file-system";
-import * as Linking from "expo-linking";
+import * as Sharing from "expo-sharing";
 
 import { Supplier, fetchSupplierById, getGeneratedPDF, updateSupplier } from "../api/suppliers";
 import { useAuth } from "../context/AuthContext";
@@ -93,18 +92,21 @@ export function SupplierDetails({ route }: any) {
         try {
             setError(null);
             setGenerating(true);
-            const res = await getGeneratedPDF(supplierId, { from, to });
-            if (!res.ok) throw new Error("Failed to generate PDF");
 
+            const res = await getGeneratedPDF(supplierId, { from, to });
             const fileName = `supplier_${supplierId}.pdf`;
             const localFile = new File(Paths.cache, fileName);
 
             const bytes = await res.arrayBuffer();
             localFile.write(new Uint8Array(bytes));
 
-            await openPDFInNativeViewer(localFile.uri);
+            if (Platform.OS !== "web" && (await Sharing.isAvailableAsync())) {
+                await Sharing.shareAsync(localFile.uri);
+            } else {
+                Alert.alert("PDF gespeichert", localFile.uri);
+            }
         } catch (err: any) {
-            setError(err.message ?? "Failed to generate PDFs");
+            setError(err.message ?? "Failed to generate PDF");
         } finally {
             setGenerating(false);
         }
@@ -190,13 +192,13 @@ export function SupplierDetails({ route }: any) {
                                 <TextInput
                                     value={from}
                                     onChangeText={setFrom}
-                                    placeholder="Von"
+                                    placeholder="Von (YYYY-MM-DD)"
                                     style={{ borderWidth: 1, padding: 8, borderRadius: 4, width: "48%" }}
                                 />
                                 <TextInput
                                     value={to}
                                     onChangeText={setTo}
-                                    placeholder="Bis"
+                                    placeholder="Bis (YYYY-MM-DD)"
                                     style={{ borderWidth: 1, padding: 8, borderRadius: 4, width: "48%" }}
                                 />
                             </View>

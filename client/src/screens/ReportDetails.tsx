@@ -45,7 +45,6 @@ export function ReportDetails({ route }: any) {
             setDescription(data.description || "");
             setStatus(data.status);
             setUpdateNotes(data.updateNotes || "");
-            setSelectedSupplier(supplierId);
         } catch (err: any) {
             setError(err.message ?? "Failed to load supplier");
         } finally {
@@ -61,13 +60,9 @@ export function ReportDetails({ route }: any) {
             const data = await fetchSuppliers();
             setSuppliers(data);
 
-            setSelectedSupplier((current) => {
-                if (!current) return null;
+            const currentSupplierId = typeof supplierId === "string" ? supplierId : supplierId?._id;
 
-                const freshSelectedSupplier = data.find((supplier) => supplier._id === current._id);
-
-                return freshSelectedSupplier?.isActive === true ? freshSelectedSupplier : null;
-            });
+            setSelectedSupplier(data.find((supplier) => supplier._id === currentSupplierId) ?? null);
         } catch (err: any) {
             setError(err.message ?? "Lieferanten konnten nicht geladen werden");
         }
@@ -104,23 +99,24 @@ export function ReportDetails({ route }: any) {
             setSaving(false);
         }
     }
-
     async function generatePDF() {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/reports/${reportId}/pdf`);
-            if (!res.ok) throw new Error("Failed to generate PDF");
+            setError(null);
 
-            const fileName = `server_${reportId}.pdf`;
-
+            const res = await getGeneratedPDF(reportId);
+            const fileName = `report_${reportId}.pdf`;
             const localFile = new File(Paths.cache, fileName);
 
             const bytes = await res.arrayBuffer();
             localFile.write(new Uint8Array(bytes));
 
-            console.log("PDF saved at:", localFile.uri);
-            // await openPdfInNativeViewer(localFile.uri);
+            if (Platform.OS !== "web" && (await Sharing.isAvailableAsync())) {
+                await Sharing.shareAsync(localFile.uri);
+            } else {
+                Alert.alert("PDF gespeichert", localFile.uri);
+            }
         } catch (err: any) {
-            setError(err.massage ?? "PDF konnte nicht generiert werden");
+            setError(err.message ?? "PDF konnte nicht generiert werden");
         }
     }
 
