@@ -68,7 +68,7 @@ export function RootLayout() {
                 <Stack.Navigator>
                     <Stack.Screen name="Home" component={HomeScreen} />
                     <Stack.Screen name="SuppliersScreen" options={{ title: "Lieferanten" }} component={SuppliersScreen} />
-                    <Stack.Screen name="SupplierDatails" options={{ title: "Lieferantendetails" }} component={SupplierDetails} />
+                    <Stack.Screen name="SupplierDetails" options={{ title: "Lieferantendetails" }} component={SupplierDetails} />
                     <Stack.Screen name="ReportsScreen" options={{ title: "Berichte" }} component={ReportsScreen} />
                     <Stack.Screen name="ReportDetails" options={{ title: "Berichtsdetails" }} component={ReportDetails} />
                     <Stack.Screen name="CreateReport" options={{ title: "Bericht erstellen" }} component={CreateReport} />

@@ -5,8 +5,6 @@ const multer = require("multer");
 const uploadRoot = path.join(__dirname, "../uploads/");
 const getReportDir = (reportId) => path.join(uploadRoot, "reports", String(reportId), "images");
 
-
-
 const storage = multer.diskStorage({
     destination: (req, _file, cb) => {
         const reportId = req._id;
@@ -17,11 +15,6 @@ const storage = multer.diskStorage({
     },
 
     filename: (req, file, cb) => {
-        // const originalExtension = path.extname(file.originalname || "").toLowerCase();
-        // const extension = originalExtension || ".jpg";
-
-        // cb(null, `report_${Date.now()}_${Math.round(Math.random() * 1_000_000)}${extension}`);
-
         const reportId = req._id;
         if (!reportId) return cb(new Error("Missing reportId for report upload"));
         const ext = path.extname(file.originalname);
@@ -34,10 +27,17 @@ const storage = multer.diskStorage({
 const fileFilter = (_req, file, cb) => {
     const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-    if (!allowedMimeTypes.includes(file.mimeType)) {
+    if (!allowedMimeTypes.includes(file.mimetype)) {
         return cb(new Error("Nur  JPG, JPEG, PNG und WEBP sind erlaubt"));
     }
 
     cb(null, true);
 };
-exports.uploadReportImages = multer({ storage }).array("images", 5);
+exports.uploadReportImages = multer({
+    storage,
+    fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024,
+        files: 5,
+    },
+}).array("images", 5);
