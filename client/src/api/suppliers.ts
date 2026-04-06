@@ -23,7 +23,11 @@ export async function fetchSupplierById(id: string): Promise<Supplier> {
     return res.json();
 }
 export async function setActivityById(id: string, state: boolean): Promise<Supplier> {
-    const res = await fetch(`${API_BASE_URL}/api/suppliers/${id}/activity?activ=${state}`, { headers: await getAuthHeaders() });
+    const res = await fetch(`${API_BASE_URL}/api/suppliers/${id}/activity`, {
+        method: "PATCH",
+        headers: await getJsonAuthHeaders(),
+        body: JSON.stringify({ isActive: state }),
+    });
     if (!res.ok) throw new Error(`Failed to change activity of supplier: ${res.status}`);
     return res.json();
 }
@@ -53,7 +57,7 @@ export async function updateSupplier(
 export async function createSupplier(input: { title: string; contactEmail: string; phone?: string; notes?: string }): Promise<Supplier> {
     const res = await fetch(`${API_BASE_URL}/api/suppliers`, {
         method: "POST",
-        headers: await getAuthHeaders(),
+        headers: await getJsonAuthHeaders(),
         body: JSON.stringify(input),
     });
     if (!res.ok) throw new Error(`Failed to create a supplier: ${res.status}`);

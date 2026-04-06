@@ -115,8 +115,8 @@ exports.generatePdfById = async (req, res) => {
 
         const templatePath = path.join(__dirname, "../templates/supplier.ejs");
 
-        const fTo = to.substring(0, 10)
-        const fFrom = from.substring(0, 10)
+        const fFrom = typeof from === "string" && from ? from.slice(0, 10) : "-";
+        const fTo = typeof to === "string" && to ? to.slice(0, 10) : "-";
 
         const html = await ejs.renderFile(templatePath, {
             supplier,
@@ -141,7 +141,7 @@ exports.generatePdfById = async (req, res) => {
         await page.pdf({ path: pdfPath, format: "A4", printBackground: true });
         await browser.close();
 
-        res.download(pdfPath);
+        return res.download(pdfPath, `supplier_${supplier._id}.pdf`);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "could not create PDF" });
@@ -151,7 +151,7 @@ exports.generatePdfById = async (req, res) => {
 exports.setActivity = async (req, res) => {
     try {
         const { id } = req.params;
-        const { isActive } = req.state;
+        const { isActive } = req.body;
 
         const updatedSupplier = await Supplier.findByIdAndUpdate(id, { isActive }, { new: true, runValidators: true });
 

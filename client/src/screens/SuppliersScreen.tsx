@@ -54,13 +54,15 @@ export function SuppliersScreen() {
             await load();
         } catch (err: any) {
             setError(err.message || "Failed to create supplier");
+        } finally {
+            setSaving(false);
         }
     }
 
     if (loading) {
         return (
-            <View>
-                <Text>Nicht geladen</Text>
+            <View style={{ padding: 16 }}>
+                <Text>Loading suppliers...</Text>
             </View>
         );
     }
@@ -97,11 +99,7 @@ export function SuppliersScreen() {
                         multiline
                         numberOfLines={3}
                     />
-                    <Button
-                        title={saving ? "Speichern..." : "Lieferant hinzufügen"}
-                        onPress={onCreate}
-                        disabled={saving}
-                    />
+                    <Button title={saving ? "Speichern..." : "Lieferant hinzufügen"} onPress={onCreate} disabled={saving} />
                 </View>
             ) : null}
             <Text style={{ fontWeight: "600" }}>Lieferanten</Text>
@@ -111,7 +109,7 @@ export function SuppliersScreen() {
                 keyExtractor={(s) => s._id}
                 renderItem={({ item }) => (
                     <Pressable
-                        onPress={() => navigation.navigate("SupplierDatails", { supplierId: item._id })}
+                        onPress={() => navigation.navigate("SupplierDetails", { supplierId: item._id })}
                         style={[{ padding: 8, borderBottomWidth: 1 }, !item.isActive && { backgroundColor: "#ccc" }]}
                         disabled={!item.isActive && user?.role === "employee"}
                     >
