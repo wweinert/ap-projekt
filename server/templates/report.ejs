@@ -5,31 +5,32 @@
     <meta charset="UTF-8" />
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 0 32px 32px;
-            color: #222;
-            font-size: 14px;
+            padding: 0 40px;
+            color: #333;
         }
 
         header {
-            padding: 24px 0 16px;
-            border-bottom: 2px solid #999;
-            margin-bottom: 24px;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #ccc;
         }
 
         header h1 {
             margin: 0;
-            font-size: 26px;
+            font-size: 28px;
+            color: #ccc;
         }
 
         .section {
-            margin-bottom: 24px;
+            margin-top: 30px;
         }
 
         .section h2 {
-            margin: 0 0 12px;
-            font-size: 18px;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ccc;
         }
 
         table {
@@ -46,23 +47,47 @@
         }
 
         th {
+            background-color: #f2f2f2;
+            font-weight: 600;
             width: 30%;
-            background: #f3f3f3;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
         }
 
         .image-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
+            margin-top: 10px;
         }
 
+        .image-item {
+            width: 180px;
+        }
 
-        .image-grid img {
-            width: 168px;
-            height: 168px;
+        .image-item img {
+            width: 100%;
+            height: 180px;
             object-fit: cover;
             border: 1px solid #ddd;
-            border-radius: 6px;
+            border-radius: 4px;
+            display: block;
+            background: #fafafa;
+        }
+
+        .image-caption {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .no-images {
+            padding: 12px;
+            border: 1px solid #ddd;
+            background-color: #fafafa;
         }
 
         footer {
@@ -87,60 +112,50 @@
         <table>
             <tr>
                 <th>Titel</th>
-                <td>
-                    <%= report.title %>
-                </td>
+                <td><%= report.title %></td>
             </tr>
             <tr>
                 <th>Beschreibung</th>
-                <td>
-                    <%= report.description || "Keine Beschreibung" %>
-                </td>
+                <td><%= report.description || "Keine Beschreibung" %></td>
             </tr>
             <tr>
                 <th>Status</th>
-                <td>
-                    <%= report.status==="DEFECT" ? "Defekt" : "OK" %>
-                </td>
+                <td><%= report.status === "DEFECT" ? "Defekt" : "OK" %></td>
             </tr>
             <tr>
                 <th>Lieferant</th>
-                <td>
-                    <%= supplier.title %>
-                </td>
+                <td><%= supplier.title %></td>
             </tr>
             <tr>
                 <th>Erstellt von</th>
-                <td>
-                    <%= report.createdByEmail || "" %>
-                </td>
+                <td><%= report.createdByEmail || "Keine Angabe" %></td>
             </tr>
             <tr>
                 <th>Erstellt am</th>
-                <td>
-                    <%= report.createdAt ? new Date(report.createdAt).toLocaleString("de-DE") : "" %>
-                </td>
+                <td><%= report.createdAt ? new Date(report.createdAt).toLocaleString("de-DE") : "" %></td>
             </tr>
-
         </table>
     </div>
 
     <div class="section">
-        <h2>Bilder</h2>
+        <h2>Bildnachweise</h2>
 
-        <div class="image-grid">
-            <% if (report.images && Array.isArray(report.images) && report.images.length) { %>
-                <% report.images.forEach(function (imgPath) { const fullSrc=imgPath.startsWith("http") ? imgPath :
-                    baseUrl.replace(/\/$/, "" ) + imgPath; // imgPath is "/uploads/..." %>
-                    <img src="<%= fullSrc %>" alt="Report Image" />
-                    <% }); %>
-                        <% } else { %>
-                            <% for (let i=1; i <=6; i++) { %>
-                                <img src="https://via.placeholder.com/150?text=Beispiel+Bild+<%= i %>"
-                                    alt="Beispiel Bild <%= i %>" />
-                                <% } %>
-                                    <% } %>
-        </div>
+        <% if (report.images && Array.isArray(report.images) && report.images.length) { %>
+            <div class="image-grid">
+                <% report.images.forEach(function (imgPath, idx) { 
+                    const fullSrc = imgPath.startsWith("http")
+                        ? imgPath
+                        : baseUrl.replace(/\/$/, "") + imgPath;
+                %>
+                    <div class="image-item">
+                        <img src="<%= fullSrc %>" alt="Bildnachweis <%= idx + 1 %>" />
+                        <div class="image-caption">Bild <%= idx + 1 %></div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="no-images">Keine Bildnachweise vorhanden.</div>
+        <% } %>
     </div>
 
     <footer>

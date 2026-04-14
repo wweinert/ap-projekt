@@ -19,7 +19,7 @@ import { File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 
 // DON'T DELETE. CAMPATIBLE JUST WITH MOBILE DEVICES
-import ImageViewing from "react-native-image-viewing";
+// import ImageViewing from "react-native-image-viewing";
 
 import { Report, deleteReport, fetchReportsById, getGeneratedPDF, updateReport } from "../api/reports";
 import { fetchSuppliers, Supplier } from "../api/suppliers";
@@ -256,12 +256,12 @@ export function ReportDetails({ route }: any) {
                                     );
                                 }}
                             />
-                            <ImageViewing
+                            {/* <ImageViewing
                                 images={viewerImages}
                                 imageIndex={selectedImgIdx}
                                 visible={viewerState}
                                 onRequestClose={() => setViewerState(false)}
-                            />
+                            /> */}
                         </>
                     ) : (
                         <Text>Keine Bilder vorhanden</Text>
