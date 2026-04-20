@@ -3,9 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 const reportController = require("../controllers/report-controller");
-const { uploadReportImages } = require("../middleware/uploadMiddleware");
-const { requireAuth } = require("../middleware/auth-middleware");
-const ensureReportId = require("../middleware/ensureReportId");
+const { uploadReportImages } = require("../middlewares/uploadMiddleware");
+const { requireAuth } = require("../middlewares/auth-middleware");
+const ensureReportId = require("../middlewares/ensureReportId");
 
 router.get("/", requireAuth, reportController.getReports);
 router.get("/supplier/:supplierId", requireAuth, reportController.getAllBySupplierId);

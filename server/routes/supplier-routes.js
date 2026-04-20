@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const supplierController = require("../controllers/supplier-controller");
-const { requireAuth, requireRole } = require("../middleware/auth-middleware");
+const { requireAuth, requireRole } = require("../middlewares/auth-middleware");
 
 router.post("/", requireAuth, requireRole("admin"), supplierController.createSupplier);
 router.get("/", requireAuth, supplierController.getSuppliers);
