@@ -1,4 +1,4 @@
-import { Button, Text, TextInput, View, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView } from "react-native";
+import { Text, TextInput, View, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView } from "react-native";
 import { File, Paths } from "expo-file-system";
 import { useEffect, useState } from "react";
 import * as Sharing from "expo-sharing";
@@ -22,7 +22,6 @@ export function SupplierDetails({ route }: any) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // PDF generating options
     const [fromDate, setFromDate] = useState(new Date());
     const [toDate, setToDate] = useState(new Date());
     const [showFromPicker, setShowFromPicker] = useState(false);
@@ -30,7 +29,6 @@ export function SupplierDetails({ route }: any) {
 
     const [generating, setGenerating] = useState(false);
 
-    // modes: view, edit, pdf
     const [mode, setMode] = useState<"view" | "edit" | "pdf">("view");
     const isEditMode = mode === "edit";
 
@@ -56,6 +54,7 @@ export function SupplierDetails({ route }: any) {
         setIsActive(data.isActive || false);
         setPhone(data.phone || "");
     }
+
     async function updateSupplierHandle() {
         try {
             setError(null);
@@ -83,7 +82,8 @@ export function SupplierDetails({ route }: any) {
             setSaving(false);
         }
     }
-    async function canelUpdating() {
+
+    async function cancelUpdating() {
         try {
             const data = await fetchSupplierById(supplierId);
             applySupplierData(data);
@@ -91,8 +91,9 @@ export function SupplierDetails({ route }: any) {
             setError(err.message ?? "Aktualisierung des Lieferanten fehlgeschlagen");
         }
     }
+
     function formatDate(value: Date) {
-        return value.toISOString().slice(0, 10); // YYYY-MM-DD
+        return value.toISOString().slice(0, 10);
     }
 
     function onChangeFrom(_event: DateTimePickerEvent, selected?: Date) {
@@ -138,126 +139,130 @@ export function SupplierDetails({ route }: any) {
     }, []);
 
     return (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-            {loading ? <Text>Loading...</Text> : null}
-            {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.screen}>
+            {loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
             {!loading ? (
                 <>
+                    <Text style={styles.label}>Name</Text>
                     <TextInput
                         value={title}
                         onChangeText={setTitle}
-                        placeholder="Name des Lieferanten"
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4, borderColor: !isEditMode ? "#ccc" : "black" }}
+                        placeholder=" "
+                        style={[styles.input, !isEditMode && styles.inputReadonly]}
                         editable={isEditMode}
+                        placeholderTextColor="#9ca3af"
                     />
 
+                    <Text style={styles.label}>Kontakt-E-Mail</Text>
                     <TextInput
                         value={contactEmail}
                         onChangeText={setContactEmail}
-                        placeholder="Kontakt-E-Mail"
+                        placeholder=" "
                         autoCapitalize="none"
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4, borderColor: !isEditMode ? "#ccc" : "black" }}
+                        style={[styles.input, !isEditMode && styles.inputReadonly]}
                         editable={isEditMode}
+                        placeholderTextColor="#9ca3af"
                     />
+
+                    <Text style={styles.label}>Telefon</Text>
                     <TextInput
                         value={phone}
                         onChangeText={setPhone}
-                        placeholder="Telefon"
+                        placeholder=" "
                         keyboardType="numeric"
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4, borderColor: !isEditMode ? "#ccc" : "black" }}
+                        style={[styles.input, !isEditMode && styles.inputReadonly]}
                         editable={isEditMode}
+                        placeholderTextColor="#9ca3af"
                     />
+
+                    <Text style={styles.label}>Notizen</Text>
                     <TextInput
                         value={notes}
                         onChangeText={setNotes}
-                        placeholder="Notizen"
+                        placeholder=" "
                         multiline
                         numberOfLines={4}
-                        style={{
-                            borderWidth: 1,
-                            padding: 8,
-                            borderRadius: 4,
-                            minHeight: 90,
-                            borderColor: !isEditMode ? "#ccc" : "black",
-                        }}
+                        style={[styles.input, styles.textarea, !isEditMode && styles.inputReadonly]}
                         editable={isEditMode}
+                        placeholderTextColor="#9ca3af"
+                        textAlignVertical="top"
                     />
 
-                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <View style={styles.statusRow}>
                         <TouchableOpacity
-                            style={[styles.button, { width: "48%" }, isActive ? { backgroundColor: "grey" } : { backgroundColor: "#ccc" }]}
+                            style={[styles.statusButton, isActive && styles.statusButtonActive]}
                             onPress={() => setIsActive(true)}
                             disabled={!isEditMode}
                         >
-                            <Text>ACTIV</Text>
+                            <Text style={[styles.statusButtonText, isActive && styles.statusButtonTextActive]}>AKTIV</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.button, { width: "48%" }, isActive ? { backgroundColor: "#ccc" } : { backgroundColor: "grey" }]}
+                            style={[styles.statusButton, !isActive && styles.statusButtonActive]}
                             onPress={() => setIsActive(false)}
                             disabled={!isEditMode}
                         >
-                            <Text>INAKTIV</Text>
+                            <Text style={[styles.statusButtonText, !isActive && styles.statusButtonTextActive]}>INAKTIV</Text>
                         </TouchableOpacity>
                     </View>
 
                     {mode === "view" ? (
-                        <View style={{ gap: 8 }}>
-                            {user?.role === "admin" ? <Button title="Bearbeiten" onPress={() => setMode("edit")} /> : null}
-                            <Button title="PDF erstellen" onPress={() => setMode("pdf")} />
+                        <View style={styles.actionStack}>
+                            {user?.role === "admin" ? (
+                                <TouchableOpacity style={styles.primaryButton} onPress={() => setMode("edit")}>
+                                    <Text style={styles.primaryButtonText}>Bearbeiten</Text>
+                                </TouchableOpacity>
+                            ) : null}
+                            <TouchableOpacity style={styles.secondaryButton} onPress={() => setMode("pdf")}>
+                                <Text style={styles.secondaryButtonText}>PDF erstellen</Text>
+                            </TouchableOpacity>
                         </View>
                     ) : null}
 
                     {mode === "edit" ? (
-                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <TouchableOpacity
-                                onPress={updateSupplierHandle}
-                                disabled={saving}
-                                style={[styles.button, { width: "48%", backgroundColor: "green" }]}
-                            >
-                                <Text style={styles.buttonText}>{saving ? "Speichern..." : "Aktualisieren"}</Text>
+                        <View style={styles.twoColActions}>
+                            <TouchableOpacity onPress={updateSupplierHandle} disabled={saving} style={styles.primaryHalfButton}>
+                                <Text style={styles.primaryButtonText}>{saving ? "Speichern..." : "Aktualisieren"}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={async () => {
-                                    await canelUpdating();
+                                    await cancelUpdating();
                                     setMode("view");
                                 }}
                                 disabled={saving}
-                                style={[styles.button, { width: "48%", backgroundColor: "red" }]}
+                                style={styles.dangerHalfButton}
                             >
-                                <Text style={styles.buttonText}>Abbrechen</Text>
+                                <Text style={styles.dangerButtonText}>Abbrechen</Text>
                             </TouchableOpacity>
                         </View>
                     ) : null}
 
                     {mode === "pdf" ? (
                         <>
-                            <View style={{ borderWidth: 1, gap: 12, padding: 8 }}>
-                                <TouchableOpacity style={styles.button} onPress={() => setShowFromPicker(true)}>
-                                    <Text style={styles.buttonText}>Von: {formatDate(fromDate)}</Text>
+                            <View style={styles.pdfBox}>
+                                <TouchableOpacity style={styles.secondaryButton} onPress={() => setShowFromPicker(true)}>
+                                    <Text style={styles.secondaryButtonText}>Von: {formatDate(fromDate)}</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.button} onPress={() => setShowToPicker(true)}>
-                                    <Text style={styles.buttonText}>Bis: {formatDate(toDate)}</Text>
+                                <TouchableOpacity style={styles.secondaryButton} onPress={() => setShowToPicker(true)}>
+                                    <Text style={styles.secondaryButtonText}>Bis: {formatDate(toDate)}</Text>
                                 </TouchableOpacity>
 
-                                {showFromPicker ? (
-                                    <DateTimePicker value={fromDate} mode="date" display="default" onChange={onChangeFrom} />
-                                ) : null}
-
-                                {showToPicker ? (
-                                    <DateTimePicker value={toDate} mode="date" display="default" onChange={onChangeTo} />
-                                ) : null}
+                                {showFromPicker ? <DateTimePicker value={fromDate} mode="date" display="default" onChange={onChangeFrom} /> : null}
+                                {showToPicker ? <DateTimePicker value={toDate} mode="date" display="default" onChange={onChangeTo} /> : null}
                             </View>
 
-                            <Button
-                                title={generating ? "Generiere..." : "PDF generieren"}
-                                onPress={generatePDFHandle}
-                                disabled={generating}
-                            />
-                            <Button title="Zurück" onPress={() => setMode("view")} />
+                            <TouchableOpacity style={styles.primaryButton} onPress={generatePDFHandle} disabled={generating}>
+                                <Text style={styles.primaryButtonText}>{generating ? "Generiere..." : "PDF generieren"}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.secondaryButton} onPress={() => setMode("view")}>
+                                <Text style={styles.secondaryButtonText}>Zurück</Text>
+                            </TouchableOpacity>
                         </>
                     ) : null}
+
+                    <Text style={styles.hintText}>ID: {supplier?._id ?? "-"}</Text>
                 </>
             ) : null}
         </ScrollView>
@@ -265,17 +270,144 @@ export function SupplierDetails({ route }: any) {
 }
 
 const styles = StyleSheet.create({
-    button: {
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        borderRadius: 2,
-        fontSize: 14,
-        backgroundColor: "#1e90ff",
+    screen: {
+        flex: 1,
+        backgroundColor: "#f3f4f6",
     },
-    buttonText: {
-        textAlign: "center",
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: 500,
+    content: {
+        padding: 16,
+        gap: 10,
+        paddingBottom: 32,
+    },
+    loadingText: {
+        color: "#6b7280",
+        fontSize: 13,
+    },
+    errorText: {
+        color: "#dc2626",
+        fontSize: 13,
+    },
+    label: {
+        color: "#4b5563",
+        fontSize: 15,
+        fontWeight: "600",
+        marginTop: 4,
+    },
+    input: {
+        minHeight: 46,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        borderRadius: 8,
+        backgroundColor: "#ffffff",
+        paddingHorizontal: 12,
+        color: "#111827",
+        fontSize: 15,
+    },
+    inputReadonly: {
+        backgroundColor: "#f8fafc",
+        color: "#4b5563",
+    },
+    textarea: {
+        minHeight: 90,
+        paddingTop: 10,
+        paddingBottom: 10,
+    },
+    statusRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+    statusButton: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        backgroundColor: "#eef1f5",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    statusButtonActive: {
+        borderColor: "#1d72f3",
+        backgroundColor: "#eff6ff",
+    },
+    statusButtonText: {
+        color: "#6b7280",
+        fontSize: 14,
+        fontWeight: "600",
+    },
+    statusButtonTextActive: {
+        color: "#1d72f3",
+    },
+    actionStack: {
+        gap: 8,
+        marginTop: 6,
+    },
+    primaryButton: {
+        minHeight: 46,
+        borderRadius: 8,
+        backgroundColor: "#1d72f3",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    primaryButtonText: {
+        color: "#ffffff",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    secondaryButton: {
+        minHeight: 46,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        backgroundColor: "#ffffff",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    secondaryButtonText: {
+        color: "#374151",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    twoColActions: {
+        flexDirection: "row",
+        gap: 10,
+        justifyContent: "space-between",
+    },
+    primaryHalfButton: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: 8,
+        backgroundColor: "#1d72f3",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    dangerHalfButton: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#ef4444",
+        backgroundColor: "#fee2e2",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    dangerButtonText: {
+        color: "#b91c1c",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    pdfBox: {
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        borderRadius: 8,
+        backgroundColor: "#ffffff",
+        padding: 10,
+        gap: 10,
+    },
+    hintText: {
+        color: "#9ca3af",
+        fontSize: 12,
+        marginTop: 4,
     },
 });

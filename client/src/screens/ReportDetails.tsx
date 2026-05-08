@@ -1,16 +1,4 @@
-import {
-    Button,
-    Text,
-    TextInput,
-    View,
-    StyleSheet,
-    TouchableOpacity,
-    FlatList,
-    Pressable,
-    Alert,
-    Platform,
-    ScrollView,
-} from "react-native";
+import { Text, TextInput, View, StyleSheet, TouchableOpacity, FlatList, Pressable, Alert, Platform, ScrollView } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
@@ -18,7 +6,7 @@ import * as Sharing from "expo-sharing";
 import { File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 
-// DON'T DELETE. CAMPATIBLE JUST WITH MOBILE DEVICES
+// DON'T DELETE. COMPATIBLE ONLY WITH MOBILE DEVICES
 import ImageViewing from "react-native-image-viewing";
 
 import { Report, deleteReport, fetchReportsById, getGeneratedPDF, updateReport } from "../api/reports";
@@ -31,7 +19,6 @@ export function ReportDetails({ route }: any) {
     const { reportId, supplierId } = route.params;
     const { user } = useAuth();
 
-    // main states
     const [mode, setMode] = useState<"view" | "edit" | "pdf">("view");
     const isEditMode = mode === "edit";
 
@@ -39,7 +26,6 @@ export function ReportDetails({ route }: any) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // fetch states
     const [report, setReport] = useState<Report | null>(null);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -47,7 +33,6 @@ export function ReportDetails({ route }: any) {
     const [viewerState, setViewerState] = useState(false);
     const [selectedImgIdx, setSelectedImgIdx] = useState(0);
 
-    // update states
     const [updateNotes, setUpdateNotes] = useState("");
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
@@ -64,21 +49,19 @@ export function ReportDetails({ route }: any) {
             setStatus(data.status);
             setUpdateNotes(data.updateNotes || "");
         } catch (err: any) {
-            setError(err.message ?? "Failed to load supplier");
+            setError(err.message ?? "Bericht konnte nicht geladen werden");
         } finally {
             setLoading(false);
         }
     }
-    const viewerImages = (report?.images ?? []).map((item) => ({
-        uri: `${API_BASE_URL}${item}`,
-    }));
+
+    const viewerImages = (report?.images ?? []).map((item) => ({ uri: `${API_BASE_URL}${item}` }));
 
     function openViewer(idx: number) {
         setViewerState(true);
         setSelectedImgIdx(idx);
     }
 
-    // update functionality
     async function loadSuppliers() {
         try {
             setError(null);
@@ -87,7 +70,6 @@ export function ReportDetails({ route }: any) {
             setSuppliers(data);
 
             const currentSupplierId = typeof supplierId === "string" ? supplierId : supplierId?._id;
-
             setSelectedSupplier(data.find((supplier) => supplier._id === currentSupplierId) ?? null);
         } catch (err: any) {
             setError(err.message ?? "Lieferanten konnten nicht geladen werden");
@@ -127,10 +109,9 @@ export function ReportDetails({ route }: any) {
         }
     }
 
-    async function canelUpdating() {
+    async function cancelUpdating() {
         try {
             setMode("view");
-
             const data = await fetchReportsById(reportId);
             setReport(data);
             setTitle(data.title || "");
@@ -163,31 +144,42 @@ export function ReportDetails({ route }: any) {
         }
     }
 
-    async function deleteReportHandle(reportId: string) {
+    async function deleteReportHandle(id: string) {
         try {
             setError(null);
             if (Platform.OS === "web") {
-                await deleteReport(reportId);
+                await deleteReport(id);
                 navigation.navigate("ReportsScreen");
-            } else {
-                Alert.alert("Bericht löschen", "Möchten Sie diesen Bericht wirklish löschen?", [
-                    {
-                        text: "Ablehnen",
-                        onPress: () => console.log("Cancel Pressed"),
-                        style: "cancel",
-                    },
-                    {
-                        text: "Löschen",
-                        onPress: async () => {
-                            await deleteReport(reportId);
-                            navigation.navigate("ReportsScreen");
-                        },
-                    },
-                ]);
+                return;
             }
+
+            Alert.alert("Bericht loeschen", "Moechten Sie diesen Bericht wirklich loeschen?", [
+                { text: "Ablehnen", style: "cancel" },
+                {
+                    text: "Loeschen",
+                    onPress: async () => {
+                        await deleteReport(id);
+                        navigation.navigate("ReportsScreen");
+                    },
+                },
+            ]);
         } catch (err: any) {
-            setError(err.message ?? "Löschen fehlgeschlagen");
+            setError(err.message ?? "Loeschen fehlgeschlagen");
         }
+    }
+
+    function formatDate(dateString?: string) {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return dateString;
+
+        return new Intl.DateTimeFormat("de-DE", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(date);
     }
 
     useEffect(() => {
@@ -196,62 +188,57 @@ export function ReportDetails({ route }: any) {
     }, []);
 
     return (
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 32 }} keyboardShouldPersistTaps="handled">
-            {loading ? <Text>Loading...</Text> : null}
-            {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" style={styles.screen}>
+            {loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            <View style={{ borderWidth: 1, borderColor: "#ccc", minHeight: 42, padding: 8 }}>
-                <Text>Erstellt am: {report?.createdAt}</Text>
-                <Text>Erstellt von: {report?.createdByName + " " + report?.createdByEmail}</Text>
-                <Text>{report?.updatedByEmail && "Aktualisiert von: " + report.updatedByEmail}</Text>
-                <Text>Status: {report?.status === "OK" ? "OK" : "DEFEKT"}</Text>
+            <View style={styles.metaBox}>
+                <Text style={styles.metaText}>Erstellt am: {formatDate(report?.createdAt)}</Text>
+                <Text style={styles.metaText}>
+                    Erstellt von: {report?.createdByName ?? "-"} {report?.createdByEmail ?? ""}
+                </Text>
+                {report?.updatedByEmail ? <Text style={styles.metaText}>Aktualisiert von: {report.updatedByEmail}</Text> : null}
+                <Text style={styles.metaText}>Status: {report?.status === "OK" ? "OK" : "DEFEKT"}</Text>
             </View>
 
             {!loading ? (
                 <>
-                    {/* <Text style={{ fontWeight: "600" }}>Titel</Text> */}
+                    <Text style={styles.label}>Titel</Text>
                     <TextInput
                         value={title}
                         onChangeText={setTitle}
-                        placeholder="Name des Lieferanten"
-                        style={{ borderWidth: 1, padding: 8, borderRadius: 4, borderColor: !isEditMode ? "#ccc" : "black" }}
+                        placeholder=" "
+                        style={[styles.input, !isEditMode && styles.inputReadonly]}
                         editable={isEditMode}
+                        placeholderTextColor="#9ca3af"
                     />
 
-                    {/* <Text style={{ fontWeight: "600" }}>Beschreibung</Text> */}
+                    <Text style={styles.label}>Beschreibung</Text>
                     <TextInput
                         value={description}
                         onChangeText={setDescription}
-                        placeholder="Beschreibung"
+                        placeholder=" "
                         multiline
-                        numberOfLines={4}
-                        style={{
-                            borderWidth: 1,
-                            padding: 8,
-                            borderRadius: 4,
-                            minHeight: 90,
-                            borderColor: !isEditMode ? "#ccc" : "black",
-                        }}
+                        style={[styles.input, styles.textarea, !isEditMode && styles.inputReadonly]}
                         editable={isEditMode}
+                        placeholderTextColor="#9ca3af"
+                        textAlignVertical="top"
                     />
 
+                    <Text style={styles.label}>Bilder</Text>
                     {report?.images && report.images.length > 0 ? (
                         <>
                             <FlatList
                                 data={report.images}
                                 horizontal
-                                contentContainerStyle={{ gap: 12 }}
+                                contentContainerStyle={styles.imagesRow}
                                 keyExtractor={(item) => item}
+                                showsHorizontalScrollIndicator={false}
                                 renderItem={({ item, index }) => {
                                     const uri = `${API_BASE_URL}${item}`;
-
                                     return (
                                         <TouchableOpacity onPress={() => openViewer(index)}>
-                                            <Image
-                                                source={{ uri }}
-                                                style={{ width: 140, height: 140, borderColor: "#ccc" }}
-                                                contentFit="cover"
-                                            />
+                                            <Image source={{ uri }} style={styles.imagePreview} contentFit="cover" />
                                         </TouchableOpacity>
                                     );
                                 }}
@@ -264,145 +251,313 @@ export function ReportDetails({ route }: any) {
                             />
                         </>
                     ) : (
-                        <Text>Keine Bilder vorhanden</Text>
+                        <Text style={styles.hintText}>Keine Bilder vorhanden</Text>
                     )}
 
-                    {isEditMode && (
-                        <>
-                            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.button,
-                                        { width: "48%" },
-                                        status === "OK" ? { backgroundColor: "grey" } : { backgroundColor: "#ccc" },
-                                    ]}
-                                    onPress={() => setStatus("OK")}
-                                    disabled={!isEditMode}
-                                >
-                                    <Text style={styles.buttonText}>OK</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.button,
-                                        { width: "48%" },
-                                        status !== "OK" ? { backgroundColor: "grey" } : { backgroundColor: "#ccc" },
-                                    ]}
-                                    onPress={() => setStatus("DEFECT")}
-                                    disabled={!isEditMode}
-                                >
-                                    <Text style={styles.buttonText}>DEFEKT</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    )}
+                    {isEditMode ? (
+                        <View style={styles.statusRow}>
+                            <TouchableOpacity
+                                style={[styles.statusButton, status === "OK" && styles.statusButtonActive]}
+                                onPress={() => setStatus("OK")}
+                                disabled={!isEditMode}
+                            >
+                                <Text style={[styles.statusButtonText, status === "OK" && styles.statusButtonTextActive]}>OK</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.statusButton, status === "DEFECT" && styles.statusButtonActive]}
+                                onPress={() => setStatus("DEFECT")}
+                                disabled={!isEditMode}
+                            >
+                                <Text style={[styles.statusButtonText, status === "DEFECT" && styles.statusButtonTextActive]}>DEFEKT</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
 
                     {mode === "view" ? (
-                        <View style={{ gap: 8 }}>
-                            {user?.role === "admin" ? <Button title="Bearbeiten" onPress={() => setMode("edit")} /> : null}
-                            <Button title="PDF erstellen" onPress={() => setMode("pdf")} />
+                        <View style={styles.actionStack}>
+                            {user?.role === "admin" ? (
+                                <TouchableOpacity style={styles.primaryButton} onPress={() => setMode("edit")}>
+                                    <Text style={styles.primaryButtonText}>Bearbeiten</Text>
+                                </TouchableOpacity>
+                            ) : null}
+                            <TouchableOpacity style={styles.secondaryButton} onPress={() => setMode("pdf")}>
+                                <Text style={styles.secondaryButtonText}>PDF erstellen</Text>
+                            </TouchableOpacity>
                         </View>
                     ) : null}
 
                     {mode === "edit" ? (
-                        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <TouchableOpacity
-                                onPress={updateReportHandle}
-                                disabled={saving}
-                                style={[styles.button, { width: "48%", backgroundColor: "green" }]}
-                            >
-                                <Text style={styles.buttonText}>{saving ? "Speichern..." : "Aktualisieren"}</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={canelUpdating}
-                                disabled={saving}
-                                style={[styles.button, { width: "48%", backgroundColor: "red" }]}
-                            >
-                                <Text style={styles.buttonText}>Abbrechen</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <>
+                            <Text style={styles.label}>Lieferant</Text>
+                            <Text style={styles.hintText}>{selectedSupplier ? selectedSupplier.title : "None"}</Text>
+
+                            <Text style={styles.label}>Hinweis zum Update</Text>
+                            <TextInput
+                                value={updateNotes}
+                                onChangeText={setUpdateNotes}
+                                placeholder=" "
+                                multiline
+                                style={[styles.input, styles.textarea]}
+                                editable={isEditMode}
+                                placeholderTextColor="#9ca3af"
+                                textAlignVertical="top"
+                            />
+
+                            <View style={styles.supplierList}>
+                                {suppliers.map((item, index) => {
+                                    const selected = selectedSupplier?._id === item._id;
+                                    const isSelectable = item.isActive === true;
+                                    const isLast = index === suppliers.length - 1;
+
+                                    return (
+                                        <Pressable
+                                            key={item._id}
+                                            onPress={() => {
+                                                if (isSelectable) setSelectedSupplier(item);
+                                            }}
+                                            disabled={!isSelectable}
+                                            style={[
+                                                styles.supplierItem,
+                                                selected && styles.supplierItemSelected,
+                                                !isSelectable && styles.supplierItemDisabled,
+                                                isLast && styles.supplierItemLast,
+                                            ]}
+                                        >
+                                            <Text style={styles.supplierText}>{item.title}</Text>
+                                            {!isSelectable ? <Text style={styles.supplierInactive}>Inaktiv</Text> : null}
+                                        </Pressable>
+                                    );
+                                })}
+                            </View>
+
+                            <View style={styles.twoColActions}>
+                                <TouchableOpacity onPress={updateReportHandle} disabled={saving} style={styles.primaryHalfButton}>
+                                    <Text style={styles.primaryButtonText}>{saving ? "Speichern..." : "Aktualisieren"}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={cancelUpdating} disabled={saving} style={styles.dangerHalfButton}>
+                                    <Text style={styles.dangerButtonText}>Abbrechen</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {user?.role === "admin" ? (
+                                <TouchableOpacity onPress={() => deleteReportHandle(reportId)} style={styles.dangerButton}>
+                                    <Text style={styles.dangerButtonText}>Löschen</Text>
+                                </TouchableOpacity>
+                            ) : null}
+                        </>
                     ) : null}
 
                     {mode === "pdf" ? (
-                        <View style={{ gap: 8 }}>
-                            <Button title="PDF jetzt erstellen" onPress={generatePDF} />
-                            <Button title="Zurück" onPress={() => setMode("view")} />
+                        <View style={styles.actionStack}>
+                            <TouchableOpacity style={styles.primaryButton} onPress={generatePDF}>
+                                <Text style={styles.primaryButtonText}>PDF jetzt erstellen</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.secondaryButton} onPress={() => setMode("view")}>
+                                <Text style={styles.secondaryButtonText}>Zurück</Text>
+                            </TouchableOpacity>
                         </View>
-                    ) : null}
-
-                    {user?.role === "admin" && mode === "edit" ? (
-                        <TouchableOpacity onPress={() => deleteReportHandle(reportId)} style={[styles.button, { backgroundColor: "red" }]}>
-                            <Text style={styles.buttonText}>Löschen</Text>
-                        </TouchableOpacity>
                     ) : null}
                 </>
             ) : null}
-
-            {isEditMode && (
-                <>
-                    <Text>Lieferant: {selectedSupplier ? selectedSupplier.title : "None"}</Text>
-
-                    <Text style={{ fontWeight: "600" }}>Hinweis zum Update</Text>
-                    <TextInput
-                        value={updateNotes}
-                        onChangeText={setUpdateNotes}
-                        placeholder="Grund für Update"
-                        multiline
-                        numberOfLines={4}
-                        style={{
-                            borderWidth: 1,
-                            padding: 8,
-                            borderRadius: 4,
-                            minHeight: 90,
-                            borderColor: !isEditMode ? "#ccc" : "black",
-                        }}
-                        editable={isEditMode}
-                    />
-
-                    <View style={{ maxHeight: 220, borderWidth: 1 }}>
-                        {suppliers.map((item) => {
-                            const selected = selectedSupplier?._id === item._id;
-                            const isSelectable = item.isActive === true;
-
-                            return (
-                                <Pressable
-                                    key={item._id}
-                                    onPress={() => {
-                                        if (isSelectable) setSelectedSupplier(item);
-                                    }}
-                                    disabled={!isSelectable}
-                                    style={[
-                                        {
-                                            padding: 10,
-                                            borderBottomWidth: 1,
-                                            backgroundColor: selected ? "#eaeaea" : "transparent",
-                                            opacity: isSelectable ? 1 : 0.5,
-                                        },
-                                        !isSelectable && { backgroundColor: "#f1f1f1" },
-                                    ]}
-                                >
-                                    <Text>{item.title}</Text>
-                                    {!isSelectable ? <Text>Inaktiv</Text> : null}
-                                </Pressable>
-                            );
-                        })}
-                    </View>
-                </>
-            )}
         </ScrollView>
     );
 }
+
 const styles = StyleSheet.create({
-    button: {
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        borderRadius: 2,
-        fontSize: 14,
-        backgroundColor: "#1e90ff",
+    screen: {
+        flex: 1,
+        backgroundColor: "#f3f4f6",
     },
-    buttonText: {
-        textAlign: "center",
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: 500,
+    content: {
+        padding: 16,
+        gap: 10,
+        paddingBottom: 32,
+    },
+    loadingText: {
+        color: "#6b7280",
+        fontSize: 13,
+    },
+    errorText: {
+        color: "#dc2626",
+        fontSize: 13,
+    },
+    metaBox: {
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        borderRadius: 8,
+        backgroundColor: "#ffffff",
+        padding: 10,
+        gap: 3,
+    },
+    metaText: {
+        color: "#374151",
+        fontSize: 13,
+    },
+    label: {
+        color: "#4b5563",
+        fontSize: 15,
+        fontWeight: "600",
+        marginTop: 4,
+    },
+    input: {
+        minHeight: 46,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        borderRadius: 8,
+        backgroundColor: "#ffffff",
+        paddingHorizontal: 12,
+        color: "#111827",
+        fontSize: 15,
+    },
+    inputReadonly: {
+        backgroundColor: "#f8fafc",
+        color: "#4b5563",
+    },
+    textarea: {
+        minHeight: 90,
+        paddingTop: 10,
+        paddingBottom: 10,
+    },
+    imagesRow: {
+        gap: 10,
+    },
+    imagePreview: {
+        width: 132,
+        height: 132,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        backgroundColor: "#ffffff",
+    },
+    hintText: {
+        color: "#6b7280",
+        fontSize: 13,
+    },
+    statusRow: {
+        flexDirection: "row",
+        gap: 10,
+        justifyContent: "space-between",
+    },
+    statusButton: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        backgroundColor: "#eef1f5",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    statusButtonActive: {
+        borderColor: "#1d72f3",
+        backgroundColor: "#eff6ff",
+    },
+    statusButtonText: {
+        color: "#6b7280",
+        fontSize: 14,
+        fontWeight: "600",
+    },
+    statusButtonTextActive: {
+        color: "#1d72f3",
+    },
+    actionStack: {
+        gap: 8,
+        marginTop: 6,
+    },
+    primaryButton: {
+        minHeight: 46,
+        borderRadius: 8,
+        backgroundColor: "#1d72f3",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    primaryButtonText: {
+        color: "#ffffff",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    secondaryButton: {
+        minHeight: 46,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        backgroundColor: "#ffffff",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    secondaryButtonText: {
+        color: "#374151",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    supplierList: {
+        maxHeight: 220,
+        borderWidth: 1,
+        borderColor: "#cfd4dc",
+        borderRadius: 8,
+        backgroundColor: "#ffffff",
+        overflow: "hidden",
+    },
+    supplierItem: {
+        minHeight: 42,
+        paddingHorizontal: 12,
+        justifyContent: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#eef2f7",
+    },
+    supplierItemSelected: {
+        backgroundColor: "#eff6ff",
+    },
+    supplierItemDisabled: {
+        backgroundColor: "#f8fafc",
+        opacity: 0.55,
+    },
+    supplierItemLast: {
+        borderBottomWidth: 0,
+    },
+    supplierText: {
+        color: "#1f2937",
+        fontSize: 14,
+    },
+    supplierInactive: {
+        color: "#9ca3af",
+        fontSize: 12,
+    },
+    twoColActions: {
+        flexDirection: "row",
+        gap: 10,
+        justifyContent: "space-between",
+    },
+    primaryHalfButton: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: 8,
+        backgroundColor: "#1d72f3",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    dangerHalfButton: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#ef4444",
+        backgroundColor: "#fee2e2",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    dangerButton: {
+        minHeight: 44,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#ef4444",
+        backgroundColor: "#fee2e2",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    dangerButtonText: {
+        color: "#b91c1c",
+        fontSize: 15,
+        fontWeight: "600",
     },
 });
