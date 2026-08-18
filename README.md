@@ -44,17 +44,6 @@ client/   React Native / Expo mobile application
 server/   Node.js / Express backend API
 ```
 
-## Architecture Overview
-
-The mobile client is responsible for the inspection workflow, user interaction and photo/document handling.  
-The backend provides API endpoints, authentication, data persistence and report-generation logic.
-
-```text
-Mobile App  ->  REST API  ->  MongoDB
-                  |
-                  -> PDF generation / file handling
-```
-
 ## Setup
 
 ### Client
